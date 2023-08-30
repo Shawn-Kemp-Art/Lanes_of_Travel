@@ -1,5 +1,5 @@
 
-document.body.innerHTML = '<style>div{color: grey;text-align:center;position:absolute;margin:auto;top:0;right:0;bottom:0;left:0;width:500px;height:100px;}</style><body><div id="loading"><h1>TEMPLATE</h1><p>This could take a while, please give it at least 5 minutes to render.</p><br><h1 class="spin">⏳</h1><br><h3>Press <strong>?</strong> for shortcut keys</h3><br><p><small>Output contains an embedded blueprint for creating an IRL wall sculpture</small></p></div></body>';
+document.body.innerHTML = '<style>div{color: grey;text-align:center;position:absolute;margin:auto;top:0;right:0;bottom:0;left:0;width:500px;height:100px;}</style><body><div id="loading"><h1>LANES OF TRAVEL</h1><p>This could take a while, please give it at least 5 minutes to render.</p><br><h1 class="spin">⏳</h1><br><h3>Press <strong>?</strong> for shortcut keys</h3><br><p><small>Output contains an embedded blueprint for creating an IRL wall sculpture</small></p></div></body>';
 paper.install(window);
 window.onload = function() {
 
@@ -124,7 +124,7 @@ var colors = []; var palette = [];
 var petalspiky = R.random_int(5, 15);
 
 
-numofcolors = R.random_int(2, stacks);; //Sets the number of colors to pick for the pallete
+numofcolors = R.random_int(2, 3);; //Sets the number of colors to pick for the pallete
 //numofcolors = $fx.getParam("number_colors");
 if (qc){numofcolors = qc};
 console.log(numofcolors+" colors");
@@ -146,7 +146,21 @@ console.log(orientation+': '+~~(wide/100/ratio)+' x '+~~(high/100/ratio))
 
 
 //setup the project variables
+var mingrid = ~~(wide/120);
+var grid = ~~(mingrid+noise.get(123)*(mingrid*4));
+var canw = wide-framewidth*2
+var canh = high-framewidth*2
+var grids = ~~(Math.sqrt(wide*high/grid))
+var starposx = ~~(wide-(grids*grid/2))
+var starposy = ~~(high-(grids*grid/2))
+var gridx = ~~((wide-framewidth*2)/grid)
+var gridy=~~((high-framewidth*2)/grid)
+var droplets = ~~(wide/(5*noise.get(223)*5+2))
 
+var shift = 1;
+if(noise.get(1)>.75){shift=(noise.get(1)/15).toFixed(3);} 
+
+var shadows=~~(3-noise.get(123534)*6)
 
 //Pick layer colors from a random pallete based on tint library
 for (var c=0; c<numofcolors; c=c+1){palette[c] = tints[R.random_int(0, tints.length-1)];};    
@@ -183,17 +197,19 @@ var center = new Point(wide/2,high/2)
 //---- Draw the Layers
 
 
+
 for (z = 0; z < stacks; z++) {
-    pz=z*prange;
     drawFrame(z); // Draw the initial frame
-    if(z==0){solid(z)}
-
+        
+   
+        //if(z==0){solid(z)} //Draw a solid background
+         
          //-----Draw each layer
-        if(z<stacks-1 && z!=0 ){
-            if (z==stacks-2){oset = minOffset}else{oset = ~~(minOffset*(stacks-z-1))}
-            somelines(z); 
-
+        if(z<stacks-1 && z!=-1){
+            fall(z,minOffset);
         }
+        
+        
         
     frameIt(z);// finish the layer with a final frame cleanup 
 
@@ -247,21 +263,43 @@ for (z = 0; z < stacks; z++) {
 
 //vvvvvvvvvvvvvvv PROJECT FUNCTIONS vvvvvvvvvvvvvvv 
  
-function somelines(z){
-        p = []
-        y = R.random_int(framewidth, high-framewidth);
-        p[0]=new Point(0,y)
-        y2 = R.random_int(framewidth, high-framewidth);
-        p[1]=new Point(wide,y2)
-        lines = new Path.Line (p[0],p[1]); 
-        mesh = PaperOffset.offsetStroke(lines, minOffset,{ cap: 'butt' });
-        mesh.flatten(4);
-        mesh.smooth();
-        lines.remove();
-        join(z,mesh); 
-        mesh.remove();
+function fall(z,offset){
 
+    px=0;py=0;
+
+    if(shift< 1){pz=z*shift;} else{pz=1}
     
+    for (x=framewidth+droplets;x<wide-framewidth;x=x+droplets){
+        px=px+.1
+        var nx=x;
+        var tp=x;
+        lines = new Path();
+        lines.add(x,1)
+        for (y=framewidth;y<high+droplets;y=y+droplets){
+            py=py+.1
+            if (noise.get(px,py,pz)<.25){y=y-droplets}
+            if (noise.get(px,py,pz)>.60){nx=nx+droplets;tp=nx-droplets/2}else if (noise.get(px,py,pz)<.30){nx=nx-droplets;tp=nx+droplets/2}else{tp=nx;}
+            lines.add(nx,y)
+            if (noise.get(px,py)<.20){
+                if (noise.get(100)>.6){
+                    spot = new Path.Rectangle(new Point(nx-offset*1.5, y-offset*1.5),new Point(nx+offset*1.5, y+offset*1.5))
+                    spot.rotate(45, new Point(nx,y))
+                }else if (noise.get(100)<.5){spot = new Path.Circle(new Point(nx, y), offset*2);}
+                else {spot = new Path.Star(new Point(nx, y), 6,offset*.8,offset*1.5);}
+                
+                mesh = PaperOffset.offsetStroke(spot, (stacks-z-1)*offset);
+                sheet[z] = (sheet[z].unite(mesh));
+                mesh.remove(); spot.remove();
+            }
+
+        }
+        
+        mesh = PaperOffset.offsetStroke(lines, (stacks-z-1)*offset);
+        sheet[z] = (sheet[z].unite(mesh));
+        mesh.remove(); lines.remove(); 
+        project.activeLayer.children[project.activeLayer.children.length-2].remove();
+
+    }
 }
 
 
