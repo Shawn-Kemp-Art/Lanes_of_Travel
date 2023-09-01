@@ -102,7 +102,7 @@ var scale = 2;
 var ratio = 1/scale;//use 1/4 for 32x40 - 1/3 for 24x30 - 1/2 for 16x20 - 1/1 for 8x10
 
 var minOffset = ~~(7*ratio); //this is aproximatly .125"
-var framewidth = ~~(R.random_int(50, 50)*scale); 
+var framewidth = ~~(R.random_int(25, 50)*scale); 
 //var framewidth = 50; 
     if (qfw){framewidth=qfw};
 
@@ -124,7 +124,7 @@ var colors = []; var palette = [];
 var petalspiky = R.random_int(5, 15);
 
 
-numofcolors = R.random_int(2, 3);; //Sets the number of colors to pick for the pallete
+numofcolors = R.random_int(2, 4);; //Sets the number of colors to pick for the pallete
 //numofcolors = $fx.getParam("number_colors");
 if (qc){numofcolors = qc};
 console.log(numofcolors+" colors");
@@ -147,15 +147,19 @@ console.log(orientation+': '+~~(wide/100/ratio)+' x '+~~(high/100/ratio))
 
 //setup the project variables
 var mingrid = ~~(wide/120);
-var grid = ~~(mingrid+noise.get(123)*(mingrid*4));
-var canw = wide-framewidth*2
-var canh = high-framewidth*2
-var grids = ~~(Math.sqrt(wide*high/grid))
-var starposx = ~~(wide-(grids*grid/2))
-var starposy = ~~(high-(grids*grid/2))
-var gridx = ~~((wide-framewidth*2)/grid)
-var gridy=~~((high-framewidth*2)/grid)
-var droplets = ~~(wide/(5*noise.get(223)*5+2))
+//var grid = ~~(mingrid+noise.get(123)*(mingrid*4));
+//var grid = R.random_int(15,15)
+//var canw = wide-framewidth*2
+//var canh = high-framewidth*2
+//var grids = ~~(Math.sqrt(wide*high/grid))
+//var starposx = ~~(wide-(grids*grid/2))
+//var starposy = ~~(high-(grids*grid/2))
+//var gridx = ~~((wide-framewidth*2)/grid)
+//var gridy=~~((high-framewidth*2)/grid)
+//var droplets = ~~(wide/(5*noise.get(223)*5+2))
+var droplets = R.random_int(20,75)
+
+console.log('droplets: '+droplets)
 
 var shift = 1;
 if(noise.get(1)>.75){shift=(noise.get(1)/15).toFixed(3);} 
@@ -189,7 +193,8 @@ sheet = []; //This will hold each layer
 var punchX =[];
 
 
-var px=0;var py=0;var pz=0;var prange=.1; 
+var px=0;var py=0;var pz=0;var prange=R.random_dec();
+console.log('entropy: '+prange) 
 
 var center = new Point(wide/2,high/2)
 
@@ -270,19 +275,19 @@ function fall(z,offset){
     if(shift< 1){pz=z*shift;} else{pz=1}
     
     for (x=framewidth+droplets;x<wide-framewidth;x=x+droplets){
-        px=px+.1
+        px=px+prange;
         var nx=x;
         var tp=x;
         lines = new Path();
         lines.add(x,1)
         for (y=framewidth;y<high+droplets;y=y+droplets){
-            py=py+.1
+            py=py+prange;
             if (noise.get(px,py,pz)<.25){y=y-droplets}
-            if (noise.get(px,py,pz)>.60){nx=nx+droplets;tp=nx-droplets/2}else if (noise.get(px,py,pz)<.30){nx=nx-droplets;tp=nx+droplets/2}else{tp=nx;}
+            if (noise.get(px,py,pz)>.60){nx=nx+droplets;tp=~~(nx-droplets/2)}else if (noise.get(px,py,pz)<.30){nx=nx-droplets;tp=nx+droplets/2}else{tp=nx;}
             lines.add(nx,y)
             if (noise.get(px,py)<.20){
                 if (noise.get(100)>.6){
-                    spot = new Path.Rectangle(new Point(nx-offset*1.5, y-offset*1.5),new Point(nx+offset*1.5, y+offset*1.5))
+                    spot = new Path.Rectangle(new Point(~~(nx-offset*1.5), y-~~(offset*1.5)),new Point(~~(nx+offset*1.5), ~~(y+offset*1.5)))
                     spot.rotate(45, new Point(nx,y))
                 }else if (noise.get(100)<.5){spot = new Path.Circle(new Point(nx, y), offset*2);}
                 else {spot = new Path.Star(new Point(nx, y), 6,offset*.8,offset*1.5);}
