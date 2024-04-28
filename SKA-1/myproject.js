@@ -85,7 +85,7 @@ var testingGo = new URLSearchParams(window.location.search).get('testing');// Ru
 var frC = R.random_int(1, 3); //random frame color white, mocha, or rainbow
 var orient=R.random_int(1, 4); // decide on orientation 
 //orient=2;
-var halfsize = R.random_int(1, 5);
+var halfsize = R.random_int(2, 5);
 
 //Set the properties for the artwork where 100 = 1 inch
 var wide = 800; 
@@ -136,8 +136,8 @@ w=wide;h=high;
 //else if ($fx.getParam("orientation")=="Square"){wide = w;high = w;orientation="Square";}
 var orientation="Portrait";
 
-if (orient==1){wide = h;high = w;orientation="Landscape";};
-if (orient==2){wide = w;high = w;orientation="Square";};
+if (orient<3){wide = h;high = w;orientation="Landscape";};
+//if (orient==2){wide = w;high = w;orientation="Square";};
 if (orient==3){wide = w;high = h;orientation="Portrait";};
 
 if (qo=="w"){wide = h;high = w;orientation="Landscape";};
@@ -179,7 +179,7 @@ p=0;for (var c=0; c<stacks; c=c+1){colors[c] = palette[p];p=p+1;if(p==palette.le
 //Pick frame color
 
 if (frC==1){colors[stacks-1]={"Hex":"#FFFFFF", "Name":"Smooth White"}};
-if (frC==2){colors[stacks-1]={"Hex":"#4C4638", "Name":"Mocha"}};
+if (frC==2){colors[stacks-1]={"Hex":"#1A1A1A", "Name":"Smooth Black"}};
     
 //Set the line color
 linecolor={"Hex":"#4C4638", "Name":"Mocha"};
@@ -208,10 +208,10 @@ for (z = 0; z < stacks; z++) {
     drawFrame(z); // Draw the initial frame
         
    
-        //if(z==0){solid(z)} //Draw a solid background
+        if(z==0){solid(z)} //Draw a solid background
          
          //-----Draw each layer
-        if(z<stacks-1 && z!=-1){
+        if(z<stacks-1 && z!=0){
             fall(z,minOffset);
         }
         
@@ -253,7 +253,7 @@ for (z = 0; z < stacks; z++) {
     $fx.features(features);
     //$fx.preview();
 
-    floatingframe();
+    //floatingframe();
      upspirestudio(features); //#render and send features to upspire.studio
 
 
